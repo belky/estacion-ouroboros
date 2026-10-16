@@ -1,24 +1,4 @@
 'use strict';
-// ── Estadísticas de juego ─────────────────────────────────────
-const _vid = (() => {
-  let v = localStorage.getItem('vb_vid');
-  if (!v) {
-    v = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = Math.random() * 16 | 0;
-      return c === 'x' ? r.toString(16) : ((r & 0x3) | 0x8).toString(16);
-    });
-    localStorage.setItem('vb_vid', v);
-  }
-  return v;
-})();
-function _track(event, score) {
-  fetch('/api/game_tracker.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'event', game: 'ouroboros', event, visitor_id: _vid, score: score ?? null }),
-    keepalive: true
-  }).catch(() => {});
-}
 // ================================================================
 //  ESTACIÓN OUROBOROS — Motor de aventura conversacional v2.1
 //  VampireBBS 2026 · Género: Ciencia ficción / Terror cósmico
@@ -994,8 +974,6 @@ function doFinal(accion) {
   if (!S.worn.has('traje_eva')) return pr('Sin el traje EVA no puedes estar en el exterior.', 'bad');
   _autoSave();
   S.flags.finalHecho = true;
-  if (accion === 'cortar') _track('end_silencio', S.score + 20);
-  else _track('end_gran_voz', S.score + 20);
   if (audioCtx) setDrone(0, 0.5);
 
   if (accion === 'cortar') {
@@ -1028,7 +1006,6 @@ function doUnirse() {
   if (S.room !== 'aislamiento') return pr('No estás en la Sala de Aislamiento.', 'bad');
   _autoSave();
   S.flags.finalHecho = true;
-  _track('end_septima_voz', S.score + 20);
   if (audioCtx) setDrone(0.15, 1);
   blank(); sep(); pr('FINAL III — LA SÉPTIMA VOZ', 'end3'); sep(); blank();
   pr('Te sientas en la séptima silla. La que estaba vacía. Como si te esperara.', 'desc');
@@ -1053,7 +1030,6 @@ function doFinal4() {
   if (!S.flags.moduladorCalibrado) return pr('El modulador necesita calibrarse a la frecuencia exacta en la sala de comunicaciones.', 'bad');
   _autoSave();
   S.flags.finalHecho = true;
-  _track('end_cable_vuelta', S.score + 20);
   blank(); sep(); pr('FINAL IV — EL CABLE DE VUELTA', 'end1'); sep(); blank();
   pr('Sacas el modulador. Los seis tripulantes giran la cabeza hacia él al unísono.', 'desc');
   blank(); pr('Por primera vez desde que los encontraste, ves algo en sus ojos que no es calma.', 'desc');
@@ -1344,7 +1320,6 @@ function doCreditos() {
 // ── Inicio del juego (tras boot) ───────────────────────────────
 function inicio() {
   bootMode = false;
-  _track('start');
   blank();
   pr('╔════════════════════════════════════════════════════════╗', 'ok');
   pr('║            E S T A C I Ó N   O U R O B O R O S        ║', 'ok');
